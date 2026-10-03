@@ -5,6 +5,8 @@ import { rateLimit } from '../security/rateLimit'
 import { hashIp, sanitizeText } from '../security/sanitize'
 import { LEGAL_CONFIG } from '@/src/config/legal'
 import { inngest } from '../jobs/client'
+import { sendEmail } from '../jobs/emailService'
+import { waitlistConfirmationTemplate } from '../jobs/emails/templates'
 import type { WaitlistInput } from '../validators/waitlist.validator'
 
 export async function getWaitlistCount(): Promise<number> {
@@ -50,7 +52,22 @@ export async function joinWaitlist(input: WaitlistInput, clientIp: string, userA
     user_agent: userAgent ? userAgent.slice(0, 255) : null,
   })
 
-  // 4. Trigger Inngest background event (non-blocking)
+  // 4. Send Confirmation Email directly via Resend
+  try {
+    const emailContent = waitlistConfirmationTemplate({
+      email: entry.email,
+      role: entry.role_interest,
+    })
+    await sendEmail({
+      to: entry.email,
+      content: emailContent,
+      idempotencyKey: `waitlist-${entry.id}`,
+    })
+  } catch (err) {
+    console.error('Direct email dispatch failure:', err)
+  }
+
+  // 5. Trigger Inngest background event (non-blocking)
   try {
     await inngest.send({
       name: 'waitlist/joined',
