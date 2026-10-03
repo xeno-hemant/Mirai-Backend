@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { Check, ChevronDown, Compass, Globe2, Heart, Menu, Rocket, Sparkles, Users, X, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { FormEvent, useEffect, useState } from 'react'
@@ -86,21 +86,29 @@ export default function Page() {
   const [openFaq, setOpenFaq] = useState(0)
   const [builderCount, setBuilderCount] = useState(1200)
   const [candidateIndex, setCandidateIndex] = useState(0)
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right'>('right')
   const [connected, setConnected] = useState(false)
+  const [isAnimating, setIsAnimating] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const currentCandidate = candidates[candidateIndex % candidates.length]
+  const middleCandidate = candidates[(candidateIndex + 1) % candidates.length]
+  const backCandidate = candidates[(candidateIndex + 2) % candidates.length]
 
-  function nextCandidate(isConnect: boolean) {
-    if (isConnect) {
+  function handleSwipe(direction: 'left' | 'right') {
+    if (isAnimating) return
+    setIsAnimating(true)
+    setSwipeDirection(direction)
+
+    if (direction === 'right') {
       setConnected(true)
-      setTimeout(() => {
-        setConnected(false)
-        setCandidateIndex((i) => (i + 1) % candidates.length)
-      }, 700)
-    } else {
-      setCandidateIndex((i) => (i + 1) % candidates.length)
     }
+
+    setTimeout(() => {
+      setCandidateIndex((prev) => prev + 1)
+      setConnected(false)
+      setIsAnimating(false)
+    }, 380)
   }
 
   useEffect(() => {
@@ -134,7 +142,7 @@ export default function Page() {
 
     <section id="startups" className="mx-auto max-w-6xl px-5 pb-28 sm:px-8"><div className="mb-10 flex items-end justify-between"><div><p className="eyebrow">The ecosystem</p><h2 className="mt-3 text-4xl tracking-tight sm:text-5xl">Everything you need<br /><span className="gradient-text italic">to move forward.</span></h2></div><Compass className="hidden size-12 text-violet/70 sm:block" /></div><div className="grid gap-4 md:grid-cols-2">{features.map((feature, index) => { const Icon = feature.icon; return <motion.article key={feature.title} whileHover={{ y: -5 }} className={`feature-card tint-${feature.tint} ${index === 0 ? 'md:row-span-2' : ''}`}><div className="flex items-start justify-between"><div className="icon-box"><Icon /></div><span className="eyebrow">0{index + 1}</span></div><div className={index === 0 ? 'mt-36 sm:mt-48' : 'mt-16'}><p className="eyebrow">{feature.eyebrow}</p><h3 className="mt-2 text-2xl">{feature.title}</h3><p className="mt-3 max-w-md text-sm leading-relaxed text-ink/55">{feature.copy}</p></div></motion.article> })}</div></section>
 
-    <section id="cofounders" className="mx-auto max-w-6xl px-5 pb-28 sm:px-8"><div className="glass-strong grid gap-10 overflow-hidden rounded-[2rem] p-6 sm:p-10 lg:grid-cols-[.85fr_1.15fr] lg:items-center"><div><p className="eyebrow">A better way to meet</p><h2 className="mt-4 text-4xl leading-tight sm:text-5xl">Your next<br /><span className="gradient-text italic">great co-founder</span><br />is out there.</h2><p className="mt-5 max-w-md leading-relaxed text-ink/55">No awkward networking. No endless scrolling. Just thoughtful matches based on how you think, work, and want to grow.</p><a href="#waitlist" className="glass-button mt-7 inline-flex">Find your people  ↗</a></div><div className="relative mx-auto w-full max-w-lg"><div className="match-stack"><div className="match-card back-card"><div className="match-photo bg-violet">M</div></div><div className="match-card middle-card"><div className="match-photo bg-blue">J</div></div><motion.div key={currentCandidate.name} initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="match-card front-card"><div className="flex items-center gap-4"><div className={`match-photo ${currentCandidate.color}`}>{currentCandidate.initial}</div><div><p className="text-xl">{currentCandidate.name}</p><p className="text-sm text-ink/50">{currentCandidate.role}</p></div><span className="ml-auto rounded-full bg-mint/20 px-3 py-1 text-xs" style={{color: '#0090ff'}}>{currentCandidate.score}</span></div><div className="mt-8 flex flex-wrap gap-2">{currentCandidate.tags.map((tag) => <span key={tag} className="tag">{tag}</span>)}</div><div className="mt-8 flex gap-3"><button onClick={() => nextCandidate(false)} className="glass-icon" aria-label="Pass candidate"><X /></button><button onClick={() => nextCandidate(true)} className="glass-button flex-1 justify-center">{connected ? <span className="flex items-center gap-2 text-mint"><Check /> Connected!</span> : <><Heart /> Connect</>}</button></div></motion.div></div></div></div></section>
+    <section id="cofounders" className="mx-auto max-w-6xl px-5 pb-28 sm:px-8"><div className="glass-strong grid gap-10 overflow-hidden rounded-[2rem] p-6 sm:p-10 lg:grid-cols-[.85fr_1.15fr] lg:items-center"><div><p className="eyebrow">A better way to meet</p><h2 className="mt-4 text-4xl leading-tight sm:text-5xl">Your next<br /><span className="gradient-text italic">great co-founder</span><br />is out there.</h2><p className="mt-5 max-w-md leading-relaxed text-ink/55">No awkward networking. No endless scrolling. Just thoughtful matches based on how you think, work, and want to grow.</p><a href="#waitlist" className="glass-button mt-7 inline-flex">Find your people  ↗</a></div><div className="relative mx-auto w-full max-w-lg"><div className="match-stack"><div className="match-card back-card"><div className={`match-photo ${backCandidate.color}`}>{backCandidate.initial}</div></div><div className="match-card middle-card"><div className={`match-photo ${middleCandidate.color}`}>{middleCandidate.initial}</div></div><AnimatePresence mode="popLayout" initial={false}><motion.div key={currentCandidate.name} initial={{ x: '-47%', y: -16, rotate: 5, scale: 0.96, opacity: 0.85 }} animate={{ x: '-50%', y: 0, rotate: 0, scale: 1, opacity: 1 }} exit={{ x: swipeDirection === 'right' ? '120%' : '-200%', y: -20, rotate: swipeDirection === 'right' ? 18 : -18, opacity: 0, transition: { duration: 0.35, ease: 'easeIn' } }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }} className="match-card front-card" style={{ left: '50%' }}><div className="flex items-center gap-4"><div className={`match-photo ${currentCandidate.color}`}>{currentCandidate.initial}</div><div><p className="text-xl">{currentCandidate.name}</p><p className="text-sm text-ink/50">{currentCandidate.role}</p></div><span className="ml-auto rounded-full bg-mint/20 px-3 py-1 text-xs" style={{color: '#0090ff'}}>{currentCandidate.score}</span></div><div className="mt-8 flex flex-wrap gap-2">{currentCandidate.tags.map((tag) => <span key={tag} className="tag">{tag}</span>)}</div><div className="mt-8 flex gap-3"><button type="button" onClick={() => handleSwipe('left')} disabled={isAnimating} className="glass-icon" aria-label="Pass candidate"><X /></button><button type="button" onClick={() => handleSwipe('right')} disabled={isAnimating} className="glass-button flex-1 justify-center">{connected ? <span className="flex items-center gap-2 text-mint"><Check /> Connected!</span> : <><Heart /> Connect</>}</button></div></motion.div></AnimatePresence></div></div></div></section>
 
     <section id="community" className="mx-auto max-w-6xl px-5 pb-28 sm:px-8"><div className="grid gap-5 md:grid-cols-3"><div className="glass rounded-3xl p-6 md:col-span-2"><p className="eyebrow">03 / Community</p><h2 className="mt-4 max-w-lg text-4xl leading-tight">The room where<br /><span className="italic text-sky">ideas get louder.</span></h2><div className="mt-12 flex items-end justify-between border-t border-white/10 pt-5"><div className="flex -space-x-3"><span className="avatar large bg-blue">N</span><span className="avatar large bg-violet">T</span><span className="avatar large bg-mint text-space">V</span><span className="avatar large bg-sky text-space">+</span></div><span className="text-sm text-ink/45">Local groups · AMAs · honest updates</span></div></div><div className="glass tint-mint rounded-3xl p-6"><div className="flex items-center justify-between"><span className="eyebrow">Live now</span><span className="status-dot mint" /></div><p className="mt-12 text-2xl">Build in public.<br /><span className="text-ink/45">Find your signal.</span></p><p className="mt-6 text-sm leading-relaxed text-ink/55">Join conversations with people building from Jaipur to everywhere.</p><a href="#waitlist" className="glass-button mt-6 inline-flex text-xs !py-2 !px-4">Join Builder Channel ↗</a></div></div></section>
 
