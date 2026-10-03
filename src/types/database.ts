@@ -37,7 +37,7 @@ export interface Database {
         Insert: {
           id?: string
           auth_user_id: string
-          role: 'founder' | 'builder' | 'student'
+          role?: 'founder' | 'builder' | 'student'
           full_name: string
           username: string
           headline?: string | null
@@ -78,6 +78,29 @@ export interface Database {
           accepted_privacy_at?: string
           terms_version?: string
           privacy_version?: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+      }
+      admin_users: {
+        Row: {
+          id: string
+          auth_user_id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string | null
+        }
+        Insert: {
+          id?: string
+          auth_user_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+        Update: {
+          id?: string
+          auth_user_id?: string
           created_at?: string
           updated_at?: string
           deleted_at?: string | null
@@ -164,7 +187,7 @@ export interface Database {
           tagline: string
           problem: string
           solution: string
-          stage: 'idea' | 'prototype' | 'mvp'
+          stage?: 'idea' | 'prototype' | 'mvp'
           industry: string
           location?: string | null
           tags?: string[]
@@ -196,6 +219,35 @@ export interface Database {
           logo_url?: string | null
           is_featured?: boolean
           featured_week?: string | null
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+      }
+      startup_members: {
+        Row: {
+          id: string
+          startup_id: string
+          user_id: string
+          role_title: string
+          created_at: string
+          updated_at: string
+          deleted_at: string | null
+        }
+        Insert: {
+          id?: string
+          startup_id: string
+          user_id: string
+          role_title: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+        Update: {
+          id?: string
+          startup_id?: string
+          user_id?: string
+          role_title?: string
           created_at?: string
           updated_at?: string
           deleted_at?: string | null
@@ -265,6 +317,38 @@ export interface Database {
           deleted_at?: string | null
         }
       }
+      community_groups: {
+        Row: {
+          id: string
+          name: string
+          slug: string
+          location: string | null
+          description: string | null
+          created_at: string
+          updated_at: string
+          deleted_at: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug: string
+          location?: string | null
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string
+          location?: string | null
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+      }
       community_posts: {
         Row: {
           id: string
@@ -304,6 +388,99 @@ export interface Database {
           media_url?: string | null
           like_count?: number
           comment_count?: number
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+      }
+      post_likes: {
+        Row: {
+          id: string
+          post_id: string
+          user_id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string | null
+        }
+        Insert: {
+          id?: string
+          post_id: string
+          user_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+        Update: {
+          id?: string
+          post_id?: string
+          user_id?: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+      }
+      post_comments: {
+        Row: {
+          id: string
+          post_id: string
+          author_id: string
+          body: string
+          created_at: string
+          updated_at: string
+          deleted_at: string | null
+        }
+        Insert: {
+          id?: string
+          post_id: string
+          author_id: string
+          body: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+        Update: {
+          id?: string
+          post_id?: string
+          author_id?: string
+          body?: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+      }
+      ama_events: {
+        Row: {
+          id: string
+          host_id: string
+          title: string
+          description: string
+          scheduled_at: string
+          duration_minutes: number
+          banner_url: string | null
+          created_at: string
+          updated_at: string
+          deleted_at: string | null
+        }
+        Insert: {
+          id?: string
+          host_id: string
+          title: string
+          description: string
+          scheduled_at: string
+          duration_minutes?: number
+          banner_url?: string | null
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+        Update: {
+          id?: string
+          host_id?: string
+          title?: string
+          description?: string
+          scheduled_at?: string
+          duration_minutes?: number
+          banner_url?: string | null
           created_at?: string
           updated_at?: string
           deleted_at?: string | null
@@ -368,6 +545,134 @@ export interface Database {
           deleted_at?: string | null
         }
       }
+      hackathon_teams: {
+        Row: {
+          id: string
+          hackathon_id: string
+          name: string
+          project_title: string | null
+          project_description: string | null
+          points: number
+          submission_url: string | null
+          created_at: string
+          updated_at: string
+          deleted_at: string | null
+        }
+        Insert: {
+          id?: string
+          hackathon_id: string
+          name: string
+          project_title?: string | null
+          project_description?: string | null
+          points?: number
+          submission_url?: string | null
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+        Update: {
+          id?: string
+          hackathon_id?: string
+          name?: string
+          project_title?: string | null
+          project_description?: string | null
+          points?: number
+          submission_url?: string | null
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+      }
+      team_members: {
+        Row: {
+          id: string
+          team_id: string
+          user_id: string
+          is_lead: boolean
+          created_at: string
+          updated_at: string
+          deleted_at: string | null
+        }
+        Insert: {
+          id?: string
+          team_id: string
+          user_id: string
+          is_lead?: boolean
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+        Update: {
+          id?: string
+          team_id?: string
+          user_id?: string
+          is_lead?: boolean
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+      }
+      hackathon_registrations: {
+        Row: {
+          id: string
+          hackathon_id: string
+          user_id: string
+          team_id: string | null
+          created_at: string
+          updated_at: string
+          deleted_at: string | null
+        }
+        Insert: {
+          id?: string
+          hackathon_id: string
+          user_id: string
+          team_id?: string | null
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+        Update: {
+          id?: string
+          hackathon_id?: string
+          user_id?: string
+          team_id?: string | null
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+      }
+      team_requests: {
+        Row: {
+          id: string
+          team_id: string
+          user_id: string
+          status: 'pending' | 'accepted' | 'rejected'
+          message: string | null
+          created_at: string
+          updated_at: string
+          deleted_at: string | null
+        }
+        Insert: {
+          id?: string
+          team_id: string
+          user_id: string
+          status?: 'pending' | 'accepted' | 'rejected'
+          message?: string | null
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+        Update: {
+          id?: string
+          team_id?: string
+          user_id?: string
+          status?: 'pending' | 'accepted' | 'rejected'
+          message?: string | null
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+      }
       notifications: {
         Row: {
           id: string
@@ -383,7 +688,7 @@ export interface Database {
           id?: string
           user_id: string
           type: string
-          payload: Json
+          payload?: Json
           read_at?: string | null
           created_at?: string
           updated_at?: string
@@ -407,13 +712,23 @@ export interface Database {
       }
     }
     Functions: {
-      create_mutual_match: {
+      is_admin: {
+        Args: Record<string, never>
+        Returns: boolean
+      }
+      current_user_id: {
+        Args: Record<string, never>
+        Returns: string | null
+      }
+      record_swipe_and_match: {
         Args: {
-          swiper: string
-          target: string
+          p_swiper_id: string
+          p_target_id: string
+          p_direction: 'connect' | 'pass'
+          p_score?: number
         }
         Returns: {
-          matched: boolean
+          is_match: boolean
           match_id: string | null
         }
       }
