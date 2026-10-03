@@ -6,7 +6,7 @@ import { getServerEnv } from '@/src/config/env'
 
 let redisClient: Redis | null = null
 
-function getRedis(): Redis | null {
+export function getRedis(): Redis | null {
   if (redisClient) return redisClient
   const env = getServerEnv()
   if (!env.UPSTASH_REDIS_REST_URL || !env.UPSTASH_REDIS_REST_TOKEN) {

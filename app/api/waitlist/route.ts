@@ -42,6 +42,7 @@ export async function POST(request: Request) {
     const result = await joinWaitlist(parsed.data, clientIp, userAgent)
     return NextResponse.json({ message: result.message })
   } catch (err: unknown) {
+    console.error('Waitlist POST error details:', err)
     const message = err instanceof Error ? err.message : 'Something went wrong.'
     const isRateLimited = message.startsWith('RATE_LIMITED')
     return NextResponse.json(
