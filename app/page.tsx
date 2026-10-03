@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion'
 import { Check, ChevronDown, Compass, Globe2, Heart, Menu, Rocket, Sparkles, Users, X, Zap } from 'lucide-react'
 import Link from 'next/link'
-import { FormEvent, useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 
 const navItems = ['Startups', 'Co-Founders', 'Community', 'Hackathons']
 const features = [
@@ -52,6 +52,13 @@ function WaitlistForm({ compact = false }: { compact?: boolean }) {
 
 export default function Page() {
   const [openFaq, setOpenFaq] = useState(0)
+  const [builderCount, setBuilderCount] = useState(1200)
+  useEffect(() => {
+    fetch('/api/waitlist')
+      .then((r) => r.json())
+      .then((d) => { if (typeof d?.count === 'number') setBuilderCount(d.count) })
+      .catch(() => {})
+  }, [])
   return <main className="min-h-screen overflow-hidden bg-space text-ink">
     <div className="aurora" aria-hidden="true" /><div className="noise" aria-hidden="true" />
     <header className="sticky top-4 z-30 mx-auto flex w-[calc(100%-2rem)] max-w-6xl items-center justify-between rounded-full border border-white/10 bg-space/70 px-3 py-2 shadow-2xl backdrop-blur-xl sm:px-5">
@@ -61,7 +68,7 @@ export default function Page() {
     </header>
 
     <section id="top" className="relative mx-auto grid max-w-6xl gap-14 px-5 pb-24 pt-24 sm:px-8 lg:grid-cols-[1.1fr_.9fr] lg:items-center lg:pb-36 lg:pt-32">
-      <div><motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .7 }} className="mb-7 flex items-center gap-3"><span className="status-dot" /> <span className="eyebrow">The builder community, reimagined</span></motion.div><motion.h1 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .1, duration: .8 }} className="max-w-3xl text-6xl leading-[.98] tracking-[-.045em] sm:text-8xl">Build the <span className="gradient-text italic">future.</span><br />Together.</motion.h1><motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .2, duration: .8 }} className="mt-7 max-w-xl text-lg leading-relaxed text-ink/65 sm:text-xl">A home for bold ideas, curious builders, and the people you haven&apos;t met yet. Find your co-founder, get discovered, and make your next move.</motion.p><motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .3, duration: .8 }} className="mt-9 max-w-xl"><WaitlistForm /><p className="mt-4 flex items-center gap-2 text-sm text-ink/45"><span className="flex -space-x-2"><span className="avatar bg-violet">A</span><span className="avatar bg-blue">K</span><span className="avatar bg-mint text-space">R</span></span> Join 1,200+ builders shaping what&apos;s next</p></motion.div></div>
+      <div><motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .7 }} className="mb-7 flex items-center gap-3"><span className="status-dot" /> <span className="eyebrow">The builder community, reimagined</span></motion.div><motion.h1 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .1, duration: .8 }} className="max-w-3xl text-6xl leading-[.98] tracking-[-.045em] sm:text-8xl">Build the <span className="gradient-text italic">future.</span><br />Together.</motion.h1><motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .2, duration: .8 }} className="mt-7 max-w-xl text-lg leading-relaxed text-ink/65 sm:text-xl">A home for bold ideas, curious builders, and the people you haven&apos;t met yet. Find your co-founder, get discovered, and make your next move.</motion.p><motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .3, duration: .8 }} className="mt-9 max-w-xl"><WaitlistForm /><p className="mt-4 flex items-center gap-2 text-sm text-ink/45"><span className="flex -space-x-2"><span className="avatar bg-violet">A</span><span className="avatar bg-blue">K</span><span className="avatar bg-mint text-space">R</span></span> Join {builderCount.toLocaleString()}+ builders shaping what&apos;s next</p></motion.div></div>
       <motion.div initial={{ opacity: 0, scale: .94, rotate: 2 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} transition={{ delay: .25, duration: 1 }} className="relative mx-auto w-full max-w-md"><div className="hero-orbit" /><div className="glass-strong relative rounded-[2rem] p-6 sm:p-8"><Logo className="mb-10 w-fit" /><div className="flex items-end justify-between"><div><p className="eyebrow">Your next chapter</p><p className="mt-3 text-4xl tracking-tight">Starts here<span className="text-blue">.</span></p></div><Sparkles className="mb-1 text-sky" /></div><div className="mt-10 flex items-center justify-between border-t border-white/10 pt-5"><span className="text-sm text-ink/45">Ideas in motion</span><span className="text-sm text-mint">+ 24% this week</span></div></div><div className="glass absolute -bottom-5 -left-5 rounded-2xl p-4 shadow-xl"><div className="flex items-center gap-3"><div className="grid size-9 place-items-center rounded-full bg-mint text-space"><Heart /></div><div><p className="text-sm">New connection</p><p className="text-xs text-ink/45">You have things in common</p></div></div></div></motion.div>
     </section>
 

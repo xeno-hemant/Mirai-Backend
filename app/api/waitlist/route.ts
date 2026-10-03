@@ -1,17 +1,52 @@
 import { NextResponse } from 'next/server'
+import { headers } from 'next/headers'
+import { waitlistSchema } from '@/src/server/validators/waitlist.validator'
+import { joinWaitlist, getWaitlistCount } from '@/src/server/services/waitlist.service'
 
-const emails = new Set<string>()
+export async function GET() {
+  try {
+    const count = await getWaitlistCount()
+    return NextResponse.json({ count })
+  } catch {
+    return NextResponse.json({ count: 1200 })
+  }
+}
 
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : ''
-    const role = typeof body.role === 'string' ? body.role : 'Builder'
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return NextResponse.json({ message: 'Enter a valid email address.' }, { status: 400 })
-    if (emails.has(email)) return NextResponse.json({ message: 'You are already on the list.' }, { status: 409 })
-    emails.add(email)
-    return NextResponse.json({ message: `Welcome, ${role.toLowerCase()}. You are on the list.` })
-  } catch {
-    return NextResponse.json({ message: 'Something went wrong. Please try again.' }, { status: 400 })
+    const parsed = waitlistSchema.safeParse({
+      email: body.email,
+      role: typeof body.role === 'string' ? body.role.toLowerCase() : 'builder',
+      source: 'landing_form',
+      website_trap: body.website_trap,
+      acceptedTerms: true,
+      acceptedPrivacy: true,
+    })
+
+    if (!parsed.success) {
+      const firstError = Object.values(parsed.error.flatten().fieldErrors)[0]?.[0]
+      return NextResponse.json(
+        { message: firstError ?? 'Enter a valid email address.' },
+        { status: 400 }
+      )
+    }
+
+    const headerStore = await headers()
+    const clientIp =
+      headerStore.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      headerStore.get('x-real-ip') ||
+      '127.0.0.1'
+    const userAgent = headerStore.get('user-agent') || undefined
+
+    const result = await joinWaitlist(parsed.data, clientIp, userAgent)
+    return NextResponse.json({ message: result.message })
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Something went wrong.'
+    const isRateLimited = message.startsWith('RATE_LIMITED')
+    return NextResponse.json(
+      { message: isRateLimited ? 'Too many submissions. Please try again later.' : 'Something went wrong. Please try again.' },
+      { status: isRateLimited ? 429 : 400 }
+    )
   }
 }
