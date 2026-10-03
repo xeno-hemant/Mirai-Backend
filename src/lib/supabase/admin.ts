@@ -1,10 +1,10 @@
 import 'server-only'
 
-import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+import { createClient as createSupabaseClient, type SupabaseClient } from '@supabase/supabase-js'
 import { getServerEnv } from '@/src/config/env'
 import type { Database } from '@/src/types/database'
 
-let adminClient: ReturnType<typeof createSupabaseClient<Database>> | null = null
+let adminClient: SupabaseClient<Database> | null = null
 
 export function createAdminClient() {
   if (adminClient) return adminClient

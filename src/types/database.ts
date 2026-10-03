@@ -6,7 +6,15 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export interface Database {
+export interface Relationship {
+  foreignKeyName: string
+  columns: string[]
+  isOneToOne?: boolean
+  referencedRelation: string
+  referencedColumns: string[]
+}
+
+export type Database = {
   public: {
     Tables: {
       users: {
@@ -82,6 +90,7 @@ export interface Database {
           updated_at?: string
           deleted_at?: string | null
         }
+        Relationships: []
       }
       admin_users: {
         Row: {
@@ -105,6 +114,7 @@ export interface Database {
           updated_at?: string
           deleted_at?: string | null
         }
+        Relationships: []
       }
       waitlist: {
         Row: {
@@ -155,6 +165,7 @@ export interface Database {
           updated_at?: string
           deleted_at?: string | null
         }
+        Relationships: []
       }
       startups: {
         Row: {
@@ -223,6 +234,7 @@ export interface Database {
           updated_at?: string
           deleted_at?: string | null
         }
+        Relationships: []
       }
       startup_members: {
         Row: {
@@ -252,6 +264,7 @@ export interface Database {
           updated_at?: string
           deleted_at?: string | null
         }
+        Relationships: []
       }
       swipes: {
         Row: {
@@ -281,6 +294,7 @@ export interface Database {
           updated_at?: string
           deleted_at?: string | null
         }
+        Relationships: []
       }
       matches: {
         Row: {
@@ -316,6 +330,7 @@ export interface Database {
           updated_at?: string
           deleted_at?: string | null
         }
+        Relationships: []
       }
       community_groups: {
         Row: {
@@ -348,6 +363,7 @@ export interface Database {
           updated_at?: string
           deleted_at?: string | null
         }
+        Relationships: []
       }
       community_posts: {
         Row: {
@@ -392,6 +408,7 @@ export interface Database {
           updated_at?: string
           deleted_at?: string | null
         }
+        Relationships: []
       }
       post_likes: {
         Row: {
@@ -418,6 +435,7 @@ export interface Database {
           updated_at?: string
           deleted_at?: string | null
         }
+        Relationships: []
       }
       post_comments: {
         Row: {
@@ -447,6 +465,7 @@ export interface Database {
           updated_at?: string
           deleted_at?: string | null
         }
+        Relationships: []
       }
       ama_events: {
         Row: {
@@ -485,6 +504,7 @@ export interface Database {
           updated_at?: string
           deleted_at?: string | null
         }
+        Relationships: []
       }
       hackathons: {
         Row: {
@@ -544,6 +564,7 @@ export interface Database {
           updated_at?: string
           deleted_at?: string | null
         }
+        Relationships: []
       }
       hackathon_teams: {
         Row: {
@@ -582,6 +603,7 @@ export interface Database {
           updated_at?: string
           deleted_at?: string | null
         }
+        Relationships: []
       }
       team_members: {
         Row: {
@@ -611,6 +633,7 @@ export interface Database {
           updated_at?: string
           deleted_at?: string | null
         }
+        Relationships: []
       }
       hackathon_registrations: {
         Row: {
@@ -640,6 +663,7 @@ export interface Database {
           updated_at?: string
           deleted_at?: string | null
         }
+        Relationships: []
       }
       team_requests: {
         Row: {
@@ -672,6 +696,7 @@ export interface Database {
           updated_at?: string
           deleted_at?: string | null
         }
+        Relationships: []
       }
       notifications: {
         Row: {
@@ -704,11 +729,13 @@ export interface Database {
           updated_at?: string
           deleted_at?: string | null
         }
+        Relationships: []
       }
     }
     Views: {
       active_startups: {
         Row: Database['public']['Tables']['startups']['Row']
+        Relationships: []
       }
     }
     Functions: {
@@ -733,5 +760,20 @@ export interface Database {
         }
       }
     }
+    Enums: {
+      user_role: 'founder' | 'builder' | 'student'
+      commitment_level: 'exploring' | 'part_time' | 'full_time'
+      startup_stage: 'idea' | 'prototype' | 'mvp'
+      swipe_direction: 'connect' | 'pass'
+      match_status: 'pending' | 'matched' | 'blocked'
+      post_type: 'post' | 'ama' | 'startup_of_the_week'
+      hackathon_mode: 'online' | 'offline' | 'hybrid'
+      hackathon_status: 'upcoming' | 'live' | 'completed'
+      team_request_status: 'pending' | 'accepted' | 'rejected'
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
 }
+
