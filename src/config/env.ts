@@ -13,7 +13,7 @@ const serverEnvSchema = clientEnvSchema.extend({
   INNGEST_EVENT_KEY: z.string().optional(),
   INNGEST_SIGNING_KEY: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),
-  EMAIL_FROM: z.string().default('Mirai <noreply@mymirai.net>'),
+  EMAIL_FROM: z.string().default('Mirai <noreply@mymirai.site>'),
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
 })

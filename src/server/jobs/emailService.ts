@@ -33,7 +33,7 @@ export async function sendEmail(params: {
     }
 
     let sender = params.from || env.EMAIL_FROM || 'Mirai <onboarding@resend.dev>'
-    const replyTo = params.replyTo || 'support@mymirai.net'
+    const replyTo = params.replyTo || 'support@mymirai.site'
 
     let res = await resend.emails.send({
       from: sender,
