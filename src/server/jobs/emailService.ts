@@ -20,6 +20,8 @@ export async function sendEmail(params: {
   to: string
   content: EmailContent
   idempotencyKey?: string
+  from?: string
+  replyTo?: string
 }): Promise<{ success: boolean; id?: string }> {
   try {
     const resend = getResendClient()
@@ -30,13 +32,16 @@ export async function sendEmail(params: {
       return { success: true, id: `sim_${Date.now()}` }
     }
 
-    let sender = env.EMAIL_FROM || 'Mirai <onboarding@resend.dev>'
+    let sender = params.from || env.EMAIL_FROM || 'Mirai <onboarding@resend.dev>'
+    const replyTo = params.replyTo || 'support@mymirai.net'
+
     let res = await resend.emails.send({
       from: sender,
       to: params.to,
       subject: params.content.subject,
       html: params.content.html,
       text: params.content.text,
+      replyTo,
       headers: params.idempotencyKey ? { 'X-Entity-Ref-ID': params.idempotencyKey } : undefined,
     })
 
