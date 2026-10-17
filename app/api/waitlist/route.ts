@@ -40,7 +40,11 @@ export async function POST(request: Request) {
     const userAgent = headerStore.get('user-agent') || undefined
 
     const result = await joinWaitlist(parsed.data, clientIp, userAgent)
-    return NextResponse.json({ message: result.message })
+    return NextResponse.json({
+      message: result.message,
+      email: result.email,
+      server: process.env.RENDER ? 'render' : 'vercel',
+    })
   } catch (err: unknown) {
     console.error('Waitlist POST error details:', err)
     const message = err instanceof Error ? err.message : 'Something went wrong.'
