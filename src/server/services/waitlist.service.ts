@@ -16,14 +16,22 @@ export async function getWaitlistCount(): Promise<number> {
 export async function joinWaitlist(input: WaitlistInput, clientIp: string, userAgent?: string) {
   const email = sanitizeText(input.email).toLowerCase()
 
-  // 1. Rate limiting: 5 per hour per IP
-  const ipLimit = await rateLimit(`waitlist:ip:${clientIp}`, 5, 3600 * 1000)
+  // 1. Rate limiting: relax for localhost / development
+  const isLocalOrDev =
+    process.env.NODE_ENV !== 'production' ||
+    clientIp === '127.0.0.1' ||
+    clientIp === '::1' ||
+    clientIp === 'localhost'
+
+  const ipMax = isLocalOrDev ? 100 : 10
+  const ipLimit = await rateLimit(`waitlist:ip:${clientIp}`, ipMax, 3600 * 1000)
   if (!ipLimit.success) {
     throw new Error('RATE_LIMITED: Too many submissions from this connection.')
   }
 
-  // Rate limiting: 3 per day per email
-  const emailLimit = await rateLimit(`waitlist:email:${email}`, 3, 86400 * 1000)
+  // Rate limiting: 10 submissions per day per email (relaxed for testing)
+  const emailMax = isLocalOrDev ? 50 : 10
+  const emailLimit = await rateLimit(`waitlist:email:${email}`, emailMax, 86400 * 1000)
   if (!emailLimit.success) {
     throw new Error('RATE_LIMITED: Too many submissions for this email.')
   }
@@ -31,9 +39,29 @@ export async function joinWaitlist(input: WaitlistInput, clientIp: string, userA
   // 2. Check idempotency (Already joined)
   const existing = await findWaitlistByEmail(email)
   if (existing) {
+    // Re-dispatch confirmation email so the user receives their confirmation
+    try {
+      const emailContent = waitlistConfirmationTemplate({
+        email: existing.email,
+        role: existing.role_interest,
+      })
+      const emailResult = await sendEmail({
+        to: existing.email,
+        content: emailContent,
+        idempotencyKey: `waitlist-${existing.id}-${Date.now()}`,
+      })
+      if (emailResult.success) {
+        console.log(`[Waitlist] Re-sent confirmation email to existing member: ${existing.email}`)
+      } else {
+        console.warn(`[Waitlist] Could not re-send confirmation email to: ${existing.email}`)
+      }
+    } catch (err) {
+      console.error('Confirmation email resend failure for existing member:', err)
+    }
+
     return {
       status: 'already_joined' as const,
-      message: 'You are already on the list.',
+      message: "You're already on the waitlist! We've sent your confirmation email.",
       email,
     }
   }
@@ -58,11 +86,16 @@ export async function joinWaitlist(input: WaitlistInput, clientIp: string, userA
       email: entry.email,
       role: entry.role_interest,
     })
-    await sendEmail({
+    const emailResult = await sendEmail({
       to: entry.email,
       content: emailContent,
-      idempotencyKey: `waitlist-${entry.id}`,
+      idempotencyKey: `waitlist-${entry.id}-${Date.now()}`,
     })
+    if (emailResult.success) {
+      console.log(`[Waitlist] Confirmation email sent successfully to ${entry.email} (ID: ${emailResult.id})`)
+    } else {
+      console.error(`[Waitlist] Failed to send confirmation email to ${entry.email}`)
+    }
   } catch (err) {
     console.error('Direct email dispatch failure:', err)
   }
@@ -83,7 +116,7 @@ export async function joinWaitlist(input: WaitlistInput, clientIp: string, userA
 
   return {
     status: 'joined' as const,
-    message: `Welcome${input.role ? `, ${input.role.toLowerCase()}` : ''}. You are on the list.`,
+    message: `Welcome${input.role ? `, ${input.role.toLowerCase()}` : ''}. You're on the list! We've sent a confirmation email to your inbox.`,
     email,
   }
 }

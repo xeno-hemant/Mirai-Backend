@@ -22,6 +22,11 @@ export async function sendEmail(params: {
   idempotencyKey?: string
   from?: string
   replyTo?: string
+  attachments?: Array<{
+    filename: string
+    content: Buffer | string
+    cid?: string
+  }>
 }): Promise<{ success: boolean; id?: string }> {
   try {
     const resend = getResendClient()
@@ -32,10 +37,11 @@ export async function sendEmail(params: {
       return { success: true, id: `sim_${Date.now()}` }
     }
 
-    let sender = params.from || env.EMAIL_FROM || 'Mirai <onboarding@resend.dev>'
+    const sender = params.from || env.EMAIL_FROM || 'Mirai <noreply@mymirai.site>'
     const replyTo = params.replyTo || 'support@mymirai.site'
+    const attachments = params.attachments || params.content.attachments
 
-    let res = await resend.emails.send({
+    const payload: Parameters<typeof resend.emails.send>[0] = {
       from: sender,
       to: params.to,
       subject: params.content.subject,
@@ -43,23 +49,16 @@ export async function sendEmail(params: {
       text: params.content.text,
       replyTo,
       headers: params.idempotencyKey ? { 'X-Entity-Ref-ID': params.idempotencyKey } : undefined,
-    })
-
-    // If custom domain is not verified, fallback to onboarding@resend.dev
-    if (res.error && (res.error.message?.includes('not verified') || res.error.statusCode === 403)) {
-      console.warn(`[Resend] Domain unverified, falling back to onboarding@resend.dev for ${params.to}`)
-      res = await resend.emails.send({
-        from: 'Mirai <onboarding@resend.dev>',
-        to: params.to,
-        subject: params.content.subject,
-        html: params.content.html,
-        text: params.content.text,
-        headers: params.idempotencyKey ? { 'X-Entity-Ref-ID': params.idempotencyKey } : undefined,
-      })
     }
 
+    if (attachments && attachments.length > 0) {
+      payload.attachments = attachments
+    }
+
+    const res = await resend.emails.send(payload)
+
     if (res.error) {
-      console.error('Resend delivery error:', res.error)
+      console.error(`[Resend Error] Failed sending to ${params.to}:`, res.error)
       return { success: false }
     }
 
@@ -70,3 +69,4 @@ export async function sendEmail(params: {
     return { success: false }
   }
 }
+

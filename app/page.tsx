@@ -37,7 +37,7 @@ function WaitlistForm({ compact = false }: { compact?: boolean }) {
     setStatus(response.ok ? 'success' : 'error')
     setMessage(data.message)
   }
-  if (status === 'success') return <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="glass-strong flex items-center gap-4 rounded-3xl p-5"><div className="grid size-11 shrink-0 place-items-center rounded-full bg-mint text-space"><Check /></div><div><p className="text-lg text-ink">You&apos;re on the list.</p><p className="text-sm text-ink/60">We&apos;ll save you a spot, {email}.</p></div></motion.div>
+  if (status === 'success') return <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="glass-strong flex items-center gap-4 rounded-3xl p-5"><div className="grid size-11 shrink-0 place-items-center rounded-full bg-mint text-space"><Check /></div><div><p className="text-lg text-ink">You&apos;re on the list.</p><p className="text-sm text-ink/60">{message || `We've sent a confirmation email to ${email}.`}</p></div></motion.div>
   return <form onSubmit={submit} className={`glass-strong rounded-3xl p-3 ${compact ? '' : 'sm:p-4'}`}>
     <div className="flex flex-col gap-3 sm:flex-row">
       <label className="sr-only" htmlFor={compact ? 'email-compact' : 'email'}>Email address</label>
