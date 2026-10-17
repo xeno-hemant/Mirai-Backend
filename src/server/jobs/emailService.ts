@@ -9,10 +9,12 @@ let resendInstance: Resend | null = null
 function getResendClient(): Resend | null {
   if (resendInstance) return resendInstance
   const env = getServerEnv()
-  if (!env.RESEND_API_KEY) {
+  const apiKey = env.RESEND_API_KEY || process.env.RESEND_API_KEY
+  if (!apiKey) {
+    console.error('[CRITICAL EMAIL DISPATCH ERROR] RESEND_API_KEY is not defined in environment variables! Please configure RESEND_API_KEY in your hosting dashboard (Vercel/Render).')
     return null
   }
-  resendInstance = new Resend(env.RESEND_API_KEY)
+  resendInstance = new Resend(apiKey)
   return resendInstance
 }
 
@@ -33,8 +35,8 @@ export async function sendEmail(params: {
     const env = getServerEnv()
 
     if (!resend) {
-      console.log(`[DEV EMAIL SIMULATION] To: ${params.to} | Subject: ${params.content.subject}`)
-      return { success: true, id: `sim_${Date.now()}` }
+      console.error(`[Resend Error] Unable to initialize Resend client for ${params.to}`)
+      return { success: false }
     }
 
     const sender = params.from || env.EMAIL_FROM || 'Mirai <noreply@mymirai.site>'

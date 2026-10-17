@@ -79,7 +79,7 @@ export function waitlistConfirmationTemplate(params: { email: string; role?: str
                     <table role="presentation" border="0" cellspacing="0" cellpadding="0">
                       <tr>
                         <td align="center" style="background: #eef6fb; border: 1px solid #d4e7f3; border-radius: 22px; padding: 14px 28px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 8px 20px rgba(18, 50, 71, 0.06);">
-                          <img src="cid:mirai-logo" alt="Mirai Logo" width="120" style="display: block; width: 120px; height: auto; border: 0; object-fit: contain;" />
+                          <img src="https://raw.githubusercontent.com/xeno-hemant/Mirai-Frontend/main/public/mirai-logo.png" alt="Mirai Logo" width="120" style="display: block; width: 120px; height: auto; border: 0; object-fit: contain;" />
                         </td>
                       </tr>
                     </table>
