@@ -67,7 +67,7 @@ export default function TermsPage() {
             <h2 className="text-lg font-semibold text-slate-900 mb-2">4. Contact & Queries</h2>
             <p>
               If you have any questions regarding these terms, reach out to us at{' '}
-              <span className="font-semibold text-[#0074db]">legal@mirai.in</span>.
+              <span className="font-semibold text-[#0074db]">legal@mymirai.site</span>.
             </p>
           </section>
         </div>

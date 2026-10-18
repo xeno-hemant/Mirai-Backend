@@ -70,7 +70,7 @@ export default function PrivacyPage() {
             <h2 className="text-lg font-semibold text-slate-900 mb-2">4. Data Deletion & Rights</h2>
             <p>
               You have the right to request deletion or export of your account and personal data at any time. Simply contact us at{' '}
-              <span className="font-semibold text-[#0074db]">privacy@mirai.in</span> and we will honor your request within 7 business days.
+              <span className="font-semibold text-[#0074db]">privacy@mymirai.site</span> and we will honor your request within 7 business days.
             </p>
           </section>
         </div>
