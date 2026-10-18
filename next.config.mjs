@@ -30,7 +30,7 @@ const securityHeaders = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com",
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https://*.supabase.co",
+      "img-src 'self' data: blob: https://*.supabase.co https://*.githubusercontent.com https://www.mymirai.site",
       "font-src 'self' data:",
       "connect-src 'self' https://*.supabase.co https://*.inngest.com https://va.vercel-scripts.com",
       "frame-ancestors 'none'",

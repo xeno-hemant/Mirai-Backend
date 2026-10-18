@@ -1,6 +1,3 @@
-import fs from 'fs'
-import path from 'path'
-
 export interface EmailAttachment {
   filename: string
   content: Buffer | string
@@ -14,117 +11,147 @@ export interface EmailContent {
   attachments?: EmailAttachment[]
 }
 
-let cachedLogo: Buffer | null = null
-
-function getMiraiLogoAttachment(): EmailAttachment | null {
-  try {
-    if (!cachedLogo) {
-      const filePath = path.join(process.cwd(), 'public', 'mirai-logo.png')
-      if (fs.existsSync(filePath)) {
-        cachedLogo = fs.readFileSync(filePath)
-      }
-    }
-    if (cachedLogo) {
-      return {
-        filename: 'mirai-logo.png',
-        content: cachedLogo,
-        cid: 'mirai-logo',
-      }
-    }
-  } catch (err) {
-    console.warn('Unable to load mirai-logo.png attachment:', err)
-  }
-  return null
-}
-
-export function waitlistConfirmationTemplate(params: { email: string; role?: string | null }): EmailContent {
+export function waitlistConfirmationTemplate(params: {
+  email: string
+  role?: string | null
+  logoUrl?: string
+}): EmailContent {
   const roleDisplay = params.role
     ? params.role.charAt(0).toUpperCase() + params.role.slice(1).toLowerCase()
     : 'Builder'
 
-  const logoAttachment = getMiraiLogoAttachment()
-  const attachments = logoAttachment ? [logoAttachment] : undefined
+  const currentYear = new Date().getFullYear()
+
+  // Publicly accessible HTTPS URL for the trimmed official Mirai logo (hosted on production Vercel edge CDN)
+  const defaultLogoUrl = 'https://www.mymirai.site/mirai-logo-trimmed.png'
+  const logoUrl = params.logoUrl || defaultLogoUrl
 
   return {
-    subject: "You're on the waitlist! We'll let you know when we go live 🚀",
-    text: `You're on the waitlist!\n\nBuild the future. Together.\n\nWelcome to Mirai, ${roleDisplay}.\n\nYour early access spot is confirmed for ${params.email}. We will let you know as soon as we go live.\n\nMirai brings your startup journey into one thoughtful space — from the first spark of an idea to finding your co-founder and shipping real products.\n\nVisit: https://mymirai.site\n\n— The Mirai Team\nMade for people who make things.`,
-    attachments,
-    html: `<!DOCTYPE html>
-<html lang="en">
+    subject: "You're on the list — Mirai early access confirmed",
+    text: `WAITLIST CONFIRMED\n\nYou're on the list.\nYou're one step closer to building something meaningful with Mirai.\n\nYou're on our early access list.\nWe're preparing something exciting. We'll email you as soon as your early access invitation is ready.\n\nYour Details:\n• Registered Email: ${params.email}\n• Selected Role: ${roleDisplay}\n\nWhat's Coming:\n• Startup Profiles — Showcase your idea.\n• Co-Founder Match — Find the right people.\n• Builder Community — Turn ideas into action.\n\nVisit: https://www.mymirai.site\n\nBuilt for people who want to build something.\n© ${currentYear} Mirai. All rights reserved.`,
+    // Do NOT send logo as a separate PNG attachment — rendered via public HTTPS CDN
+    attachments: undefined,
+    html: `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Welcome to the Mirai Waitlist</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light" />
+  <meta name="supported-color-schemes" content="light" />
+  <title>You're on the list — Mirai</title>
+  <style type="text/css">
+    body, table, td, p, a, li, blockquote {
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+    table, td {
+      mso-table-lspace: 0pt;
+      mso-table-rspace: 0pt;
+    }
+    img {
+      -ms-interpolation-mode: bicubic;
+      border: 0;
+      height: auto;
+      line-height: 100%;
+      outline: none;
+      text-decoration: none;
+    }
+    body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100% !important;
+      background-color: #f6f8fb;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+    @media only screen and (max-width: 600px) {
+      .email-wrapper {
+        padding: 20px 12px !important;
+      }
+      .card-inner {
+        padding: 32px 22px !important;
+      }
+      .user-details-table td {
+        display: block !important;
+        width: 100% !important;
+        text-align: left !important;
+        padding-bottom: 10px !important;
+      }
+      .user-details-table td.role-col {
+        padding-bottom: 0 !important;
+      }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #eef6fb; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #082638; -webkit-font-smoothing: antialiased;">
-  <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #eef6fb; padding: 48px 16px;">
+<body style="margin: 0; padding: 0; background-color: #f6f8fb; color: #082638; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+  <!-- Full background wrapper -->
+  <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" class="email-wrapper" style="background-color: #f6f8fb; padding: 48px 16px;">
     <tr>
-      <td align="center">
-        <!-- Main Card Container -->
-        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 590px; background: #ffffff; border: 1px solid #d4e7f3; border-radius: 28px; overflow: hidden; box-shadow: 0 24px 50px -12px rgba(15, 111, 159, 0.14), 0 4px 12px rgba(8, 38, 56, 0.04);">
-          
-          <!-- Gradient Top Accent Bar (Mirai Cyan -> Ocean Blue -> Violet) -->
+      <td align="center" valign="top">
+        
+        <!-- Main Card Container (560px max) -->
+        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 560px; background-color: #ffffff; border: 1px solid #e3e8ee; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 16px -2px rgba(8, 38, 56, 0.05);">
           <tr>
-            <td style="height: 6px; background: linear-gradient(90deg, #9fc9dd 0%, #0f6f9f 50%, #6b9fbe 100%); line-height: 6px; font-size: 1px;">&nbsp;</td>
-          </tr>
-
-          <!-- Card Body -->
-          <tr>
-            <td style="padding: 44px 38px 40px 38px;">
+            <td class="card-inner" style="padding: 40px 38px;">
               
-              <!-- Brand Header with Logo -->
+              <!-- Header: Official Logo -->
               <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
-                  <td align="center">
-                    <table role="presentation" border="0" cellspacing="0" cellpadding="0">
-                      <tr>
-                        <td align="center" style="background: #eef6fb; border: 1px solid #d4e7f3; border-radius: 22px; padding: 14px 28px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 8px 20px rgba(18, 50, 71, 0.06);">
-                          <img src="https://raw.githubusercontent.com/xeno-hemant/Mirai-Frontend/main/public/mirai-logo.png" alt="Mirai Logo" width="120" style="display: block; width: 120px; height: auto; border: 0; object-fit: contain;" />
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-                <tr>
-                  <td align="center" style="padding-top: 20px;">
-                    <span style="display: inline-block; padding: 5px 15px; background: rgba(15, 111, 159, 0.09); border: 1px solid rgba(15, 111, 159, 0.22); border-radius: 999px; color: #0f6f9f; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;">
-                      ● Waitlist Confirmed
-                    </span>
+                  <td align="left" style="padding-bottom: 28px;">
+                    <a href="https://www.mymirai.site" target="_blank" style="text-decoration: none; display: inline-block;">
+                      <img src="${logoUrl}" alt="Mirai" width="98" style="display: block; width: 98px; max-width: 98px; height: auto; border: 0;" />
+                    </a>
                   </td>
                 </tr>
               </table>
 
-              <!-- Main Heading & Hero Message -->
-              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top: 22px;">
+              <!-- Divider -->
+              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 26px;">
                 <tr>
-                  <td align="center">
-                    <h1 style="margin: 0; font-size: 32px; font-weight: 800; color: #082638; letter-spacing: -0.04em; line-height: 1.18;">
-                      Build the <span style="color: #0f6f9f; font-style: italic;">future.</span><br />Together.
+                  <td style="border-top: 1px solid #edf2f7; font-size: 1px; line-height: 1px;">&nbsp;</td>
+                </tr>
+              </table>
+
+              <!-- Status Badge -->
+              <table role="presentation" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 16px;">
+                <tr>
+                  <td style="background-color: #eef6fc; border: 1px solid #d2e4f5; border-radius: 9999px; padding: 4px 12px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; color: #0074db; text-transform: uppercase;">
+                    <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: #0074db; margin-right: 6px; vertical-align: middle;"></span>WAITLIST CONFIRMED
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Main Heading & Supporting Text -->
+              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td style="padding-bottom: 22px;">
+                    <h1 style="margin: 0 0 8px 0; font-size: 25px; font-weight: 700; color: #082638; letter-spacing: -0.03em; line-height: 1.25;">
+                      You&rsquo;re on the list.
                     </h1>
-                    <p style="margin: 14px 0 0 0; font-size: 16px; line-height: 1.6; color: #476a82; max-width: 470px;">
-                      You&apos;re officially on the list, <strong>${roleDisplay}</strong>. A home for bold ideas, curious builders, and idea-stage founders to turn momentum into something real.
+                    <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #516579;">
+                      You&rsquo;re one step closer to building something meaningful with Mirai.
                     </p>
                   </td>
                 </tr>
               </table>
 
-              <!-- Live Notification Highlight Box -->
-              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top: 28px;">
+              <!-- Confirmation Card (Pale Blue) -->
+              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f2f7fc; border: 1px solid #d4e5f4; border-radius: 12px; margin-bottom: 22px;">
                 <tr>
-                  <td style="background: linear-gradient(135deg, #f0f7fc 0%, #e8f3fa 100%); border: 1.5px solid #bfe0f2; border-radius: 20px; padding: 22px 24px; box-shadow: 0 4px 16px rgba(15, 111, 159, 0.06);">
+                  <td style="padding: 18px 20px;">
                     <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
                       <tr>
-                        <td width="42" valign="top" style="padding-right: 14px;">
-                          <div style="width: 40px; height: 40px; border-radius: 12px; background: #0f6f9f; text-align: center; line-height: 40px; font-size: 18px; color: #ffffff; box-shadow: 0 4px 14px rgba(15, 111, 159, 0.35);">
-                            🔔
+                        <td width="28" valign="top" style="padding-right: 12px; padding-top: 2px;">
+                          <!-- Minimal Confirmation Icon -->
+                          <div style="width: 22px; height: 22px; border-radius: 50%; background-color: #0074db; text-align: center; line-height: 22px; color: #ffffff; font-size: 12px; font-weight: bold;">
+                            &#10003;
                           </div>
                         </td>
                         <td valign="top">
-                          <p style="margin: 0; font-size: 16px; font-weight: 800; color: #082638;">
-                            We will let you know when we go live!
+                          <p style="margin: 0 0 4px 0; font-size: 14.5px; font-weight: 700; color: #082638; letter-spacing: -0.01em;">
+                            You&rsquo;re on our early access list.
                           </p>
-                          <p style="margin: 6px 0 0 0; font-size: 14px; line-height: 1.55; color: #245d78;">
-                            Your spot is locked in. We are currently preparing the early access experience for our first cohort of builders. You&apos;ll receive an exclusive invite right in this inbox as soon as early access goes live.
+                          <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: #37536b;">
+                            We&rsquo;re preparing something exciting. We&rsquo;ll email you as soon as your early access invitation is ready.
                           </p>
                         </td>
                       </tr>
@@ -133,19 +160,25 @@ export function waitlistConfirmationTemplate(params: { email: string; role?: str
                 </tr>
               </table>
 
-              <!-- Spot Reservation Details Card -->
-              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top: 22px; background: #fafcfe; border: 1px solid #d8e8f2; border-radius: 18px; padding: 20px 22px;">
+              <!-- User Details Card -->
+              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f9fbfd; border: 1px solid #e5edf5; border-radius: 12px; margin-bottom: 28px;">
                 <tr>
-                  <td>
-                    <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
+                  <td style="padding: 16px 20px;">
+                    <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" class="user-details-table">
                       <tr>
-                        <td style="font-size: 11px; text-transform: uppercase; color: #5b7f95; font-weight: 700; letter-spacing: 0.08em; padding-bottom: 5px;">Spot Reserved For</td>
-                        <td align="right" style="font-size: 11px; text-transform: uppercase; color: #5b7f95; font-weight: 700; letter-spacing: 0.08em; padding-bottom: 5px;">Role Track</td>
-                      </tr>
-                      <tr>
-                        <td style="font-size: 15px; font-weight: 700; color: #082638;">${params.email}</td>
-                        <td align="right">
-                          <span style="display: inline-block; padding: 4px 12px; background: rgba(15, 111, 159, 0.1); border-radius: 999px; font-size: 13px; font-weight: 700; color: #0f6f9f;">
+                        <td valign="top" style="text-align: left;">
+                          <div style="font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #697d91; margin-bottom: 4px;">
+                            Registered Email
+                          </div>
+                          <div style="font-size: 14px; font-weight: 600; color: #082638; word-break: break-all;">
+                            ${params.email}
+                          </div>
+                        </td>
+                        <td valign="top" align="right" class="role-col">
+                          <div style="font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #697d91; margin-bottom: 4px;">
+                            Selected Role
+                          </div>
+                          <span style="display: inline-block; font-size: 12px; font-weight: 600; color: #082638; background-color: #e6f0fa; border: 1px solid #cce1f5; border-radius: 6px; padding: 2px 10px;">
                             ${roleDisplay}
                           </span>
                         </td>
@@ -155,56 +188,50 @@ export function waitlistConfirmationTemplate(params: { email: string; role?: str
                 </tr>
               </table>
 
-              <!-- What to Expect / Feature Highlights -->
-              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top: 32px;">
+              <!-- What's Coming Section -->
+              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 28px;">
                 <tr>
-                  <td style="font-size: 12px; font-weight: 800; color: #245d78; text-transform: uppercase; letter-spacing: 0.12em; padding-bottom: 14px;">
-                    Everything you need to move forward
+                  <td style="padding-bottom: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: #475f75;">
+                    What&rsquo;s Coming
                   </td>
                 </tr>
                 <tr>
                   <td>
-                    <!-- Item 1 -->
-                    <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 12px; background: #fbfdfd; border: 1px solid #e4eff6; border-radius: 14px; padding: 14px 16px;">
+                    <!-- Feature Row 1 -->
+                    <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="padding: 10px 0; border-top: 1px solid #f0f4f8;">
                       <tr>
-                        <td width="36" valign="top">
-                          <div style="width: 32px; height: 32px; border-radius: 10px; background: rgba(15, 111, 159, 0.1); text-align: center; line-height: 32px; font-size: 15px;">
-                            🚀
-                          </div>
+                        <td width="22" valign="middle" style="padding-right: 10px;">
+                          <div style="width: 6px; height: 6px; border-radius: 50%; background-color: #0074db;"></div>
                         </td>
-                        <td valign="top" style="padding-left: 10px;">
-                          <p style="margin: 0; font-size: 14px; font-weight: 700; color: #082638;">Startup Profiles</p>
-                          <p style="margin: 2px 0 0 0; font-size: 13px; line-height: 1.45; color: #476a82;">Turn your early idea into a magnet for the right people, feedback, and momentum.</p>
+                        <td valign="middle">
+                          <span style="font-size: 14px; font-weight: 600; color: #082638;">Startup Profiles</span>
+                          <span style="font-size: 13.5px; color: #60758a;"> &mdash; Showcase your idea.</span>
                         </td>
                       </tr>
                     </table>
 
-                    <!-- Item 2 -->
-                    <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 12px; background: #fbfdfd; border: 1px solid #e4eff6; border-radius: 14px; padding: 14px 16px;">
+                    <!-- Feature Row 2 -->
+                    <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="padding: 10px 0; border-top: 1px solid #f0f4f8;">
                       <tr>
-                        <td width="36" valign="top">
-                          <div style="width: 32px; height: 32px; border-radius: 10px; background: rgba(107, 159, 190, 0.15); text-align: center; line-height: 32px; font-size: 15px;">
-                            👥
-                          </div>
+                        <td width="22" valign="middle" style="padding-right: 10px;">
+                          <div style="width: 6px; height: 6px; border-radius: 50%; background-color: #0074db;"></div>
                         </td>
-                        <td valign="top" style="padding-left: 10px;">
-                          <p style="margin: 0; font-size: 14px; font-weight: 700; color: #082638;">Co-Founder Match</p>
-                          <p style="margin: 2px 0 0 0; font-size: 13px; line-height: 1.45; color: #476a82;">Meet builders whose ambition, skills, and working rhythm fit yours.</p>
+                        <td valign="middle">
+                          <span style="font-size: 14px; font-weight: 600; color: #082638;">Co-Founder Match</span>
+                          <span style="font-size: 13.5px; color: #60758a;"> &mdash; Find the right people.</span>
                         </td>
                       </tr>
                     </table>
 
-                    <!-- Item 3 -->
-                    <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background: #fbfdfd; border: 1px solid #e4eff6; border-radius: 14px; padding: 14px 16px;">
+                    <!-- Feature Row 3 -->
+                    <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="padding: 10px 0; border-top: 1px solid #f0f4f8; border-bottom: 1px solid #f0f4f8;">
                       <tr>
-                        <td width="36" valign="top">
-                          <div style="width: 32px; height: 32px; border-radius: 10px; background: rgba(159, 201, 221, 0.2); text-align: center; line-height: 32px; font-size: 15px;">
-                            ⚡
-                          </div>
+                        <td width="22" valign="middle" style="padding-right: 10px;">
+                          <div style="width: 6px; height: 6px; border-radius: 50%; background-color: #0074db;"></div>
                         </td>
-                        <td valign="top" style="padding-left: 10px;">
-                          <p style="margin: 0; font-size: 14px; font-weight: 700; color: #082638;">Hackathon Hub</p>
-                          <p style="margin: 2px 0 0 0; font-size: 13px; line-height: 1.45; color: #476a82;">Discover events, form sharp teams, and ship proof you can show.</p>
+                        <td valign="middle">
+                          <span style="font-size: 14px; font-weight: 600; color: #082638;">Builder Community</span>
+                          <span style="font-size: 13.5px; color: #60758a;"> &mdash; Turn ideas into action.</span>
                         </td>
                       </tr>
                     </table>
@@ -212,33 +239,33 @@ export function waitlistConfirmationTemplate(params: { email: string; role?: str
                 </tr>
               </table>
 
-              <!-- CTA Button -->
-              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top: 36px;">
+              <!-- Explore Mirai Link / Action -->
+              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 32px;">
                 <tr>
-                  <td align="center">
-                    <a href="https://mymirai.site" target="_blank" style="display: inline-block; background: #007bff; background-image: linear-gradient(135deg, #007bff 0%, #0f6f9f 100%); color: #ffffff; font-size: 15px; font-weight: 700; text-decoration: none; padding: 15px 40px; border-radius: 999px; box-shadow: 0 10px 25px -4px rgba(0, 123, 255, 0.42); letter-spacing: 0.02em; text-align: center;">
+                  <td>
+                    <a href="https://www.mymirai.site" target="_blank" style="display: inline-block; background-color: #082638; color: #ffffff; font-size: 13px; font-weight: 600; text-decoration: none; padding: 9px 20px; border-radius: 7px; letter-spacing: 0.01em;">
                       Explore Mirai &rarr;
                     </a>
                   </td>
                 </tr>
               </table>
 
-              <!-- Divider -->
-              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top: 38px;">
+              <!-- Footer Divider -->
+              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
-                  <td style="border-top: 1px solid #e4eff6;">&nbsp;</td>
+                  <td style="border-top: 1px solid #edf2f7; font-size: 1px; line-height: 1px;">&nbsp;</td>
                 </tr>
               </table>
 
-              <!-- Footer -->
-              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top: 8px;">
+              <!-- Footer Content -->
+              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="padding-top: 22px;">
                 <tr>
-                  <td align="center" style="font-size: 12px; color: #64748b; line-height: 1.6;">
-                    <p style="margin: 0 0 6px 0; font-weight: 600; color: #245d78;">
-                      &copy; 2026 Mirai &middot; Made for people who make things.
+                  <td>
+                    <p style="margin: 0 0 6px 0; font-size: 13px; font-weight: 600; color: #2d475d;">
+                      Built for people who want to build something.
                     </p>
-                    <p style="margin: 0;">
-                      You received this email because you registered for early access at <a href="https://mymirai.site" style="color: #0f6f9f; font-weight: 600; text-decoration: none;">mymirai.site</a>.
+                    <p style="margin: 0; font-size: 12px; line-height: 1.6; color: #8194a5;">
+                      &copy; ${currentYear} Mirai. All rights reserved. &middot; <a href="https://www.mymirai.site" target="_blank" style="color: #60758a; text-decoration: underline;">mymirai.site</a>
                     </p>
                   </td>
                 </tr>
@@ -247,6 +274,8 @@ export function waitlistConfirmationTemplate(params: { email: string; role?: str
             </td>
           </tr>
         </table>
+        <!-- End Main Card -->
+
       </td>
     </tr>
   </table>
